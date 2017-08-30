@@ -15,3 +15,9 @@ export default function(state = initialState, action) {
       return initialState
   }
 }
+
+export function getArticles(state) {
+  const articlesById = state.articles.articlesById;
+  const articlesIdArray = _.keys(articlesById)
+  return [articlesById, articlesIdArray];
+}

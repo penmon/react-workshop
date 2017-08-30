@@ -35985,6 +35985,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 __webpack_require__(648);
@@ -36002,6 +36004,12 @@ var _reactRedux = __webpack_require__(83);
 var _components = __webpack_require__(165);
 
 var _actions = __webpack_require__(281);
+
+var _reducer = __webpack_require__(282);
+
+var articlesSelectors = _interopRequireWildcard(_reducer);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -36026,7 +36034,7 @@ var ArticlesIndex = function (_Component) {
   _createClass(ArticlesIndex, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      this.props.dispatch((0, _actions.fetchAllArticles)());
+      this.props.loadArticles();
     }
   }, {
     key: 'render',
@@ -36115,15 +36123,26 @@ var ArticlesIndex = function (_Component) {
 }(_react.Component);
 
 function mapStateToProps(state) {
+  var _articlesSelectors$ge = articlesSelectors.getArticles(state),
+      _articlesSelectors$ge2 = _slicedToArray(_articlesSelectors$ge, 2),
+      articlesById = _articlesSelectors$ge2[0],
+      articlesIdArray = _articlesSelectors$ge2[1];
 
   return {
-    user: state.user,
-    articlesById: state.articles.articlesById,
-    articlesIdArray: _.keys(state.articles.articlesById)
+    articlesById: articlesById,
+    articlesIdArray: articlesIdArray
   };
 }
 
-exports.default = (0, _reactRedux.connect)(mapStateToProps)(ArticlesIndex);
+function mapDispatchToProps(dispatch) {
+  return {
+    loadArticles: function loadArticles() {
+      dispatch((0, _actions.fetchAllArticles)());
+    }
+  };
+}
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(ArticlesIndex);
 
 /***/ }),
 /* 277 */
@@ -36597,42 +36616,15 @@ var types = _interopRequireWildcard(_actionTypes);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
 function fetchAllArticles() {
-  var _this = this;
+  return function (dispatch) {
+    var articles = (0, _articles.getAllArticles)();
+    var articlesById = _.keyBy(articles.map(function (article) {
+      return _.assignIn({ date: article.date.trim() }, article);
+    }), 'id');
 
-  return function () {
-    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(dispatch) {
-      var articles, articlesById;
-      return regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _context.next = 2;
-              return (0, _articles.getAllArticles)();
-
-            case 2:
-              articles = _context.sent;
-              articlesById = _.keyBy(articles.map(function (article) {
-                return _.assignIn({ date: article.date.trim() }, article);
-              }), 'id');
-
-
-              dispatch({ type: types.ARTICLES_FETCHED, articlesById: articlesById });
-
-            case 5:
-            case 'end':
-              return _context.stop();
-          }
-        }
-      }, _callee, _this);
-    }));
-
-    return function (_x) {
-      return _ref.apply(this, arguments);
-    };
-  }();
+    dispatch({ type: types.ARTICLES_FETCHED, articlesById: articlesById });
+  };
 }
 
 /***/ }),
@@ -36662,6 +36654,8 @@ exports.default = function () {
   }
 };
 
+exports.getArticles = getArticles;
+
 var _actionTypes = __webpack_require__(166);
 
 var types = _interopRequireWildcard(_actionTypes);
@@ -36671,6 +36665,12 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 var initialState = {
   articlesById: null
 };
+
+function getArticles(state) {
+  var articlesById = state.articles.articlesById;
+  var articlesIdArray = _.keys(articlesById);
+  return [articlesById, articlesIdArray];
+}
 
 /***/ }),
 /* 283 */

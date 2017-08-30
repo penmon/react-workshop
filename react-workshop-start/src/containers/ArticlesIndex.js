@@ -59,7 +59,14 @@ class ArticlesIndex extends Component {
 function mapStateToProps(state) {
 
   return {
+    // your code goes here
   }
 }
 
-export default connect(mapStateToProps)(ArticlesIndex)
+function mapDispatchToProps(dispatch) {
+  return {
+    // your code goes here
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ArticlesIndex)

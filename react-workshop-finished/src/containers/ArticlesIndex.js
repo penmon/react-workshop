@@ -2,9 +2,9 @@ import './ArticlesIndex.scss'
 import React, { Component } from 'react';
 import autoBind from 'react-autobind';
 import { connect } from 'react-redux';
-import {ListView, ListRow} from '../components';
-import {fetchAllArticles} from '../store/articles/actions';
-
+import { ListView, ListRow } from '../components';
+import { fetchAllArticles } from '../store/articles/actions';
+import * as articlesSelectors from '../store/articles/reducer';
 
 
 class ArticlesIndex extends Component {
@@ -14,7 +14,7 @@ class ArticlesIndex extends Component {
   }
 
   componentDidMount() {
-    this.props.dispatch(fetchAllArticles())
+    this.props.loadArticles()
   }
 
   render() {
@@ -67,12 +67,20 @@ class ArticlesIndex extends Component {
 }
 
 function mapStateToProps(state) {
-
+  const [articlesById, articlesIdArray] = articlesSelectors.getArticles(state);
   return {
-    user: state.user,
-    articlesById: state.articles.articlesById,
-    articlesIdArray: _.keys(state.articles.articlesById)
+    articlesById,
+    articlesIdArray
   }
 }
 
-export default connect(mapStateToProps)(ArticlesIndex)
+
+function mapDispatchToProps(dispatch) {
+  return {
+    loadArticles() {
+      dispatch(fetchAllArticles())
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ArticlesIndex)
